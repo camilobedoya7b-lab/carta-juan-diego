@@ -24,7 +24,7 @@ body{
 .hidden{display:none!important}
 body.armando{overflow:hidden;position:fixed;inset:0}
 @media (max-height:640px){.intro h1{font-size:1.9rem}.intro p{font-size:1.05rem}.screen{padding-top:18px}}
-.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 40px}
+.screen{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 40px}
 
 /* Brillitos de fondo */
 .sparkle{position:fixed;width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:0;pointer-events:none;animation:twinkle 4s infinite}
@@ -60,7 +60,7 @@ body.armando{overflow:hidden;position:fixed;inset:0}
   opacity:0;transform:translateY(10px);transition:all .8s;
 }
 .btn.show{opacity:1;transform:none}
-#entrar{pointer-events:none;position:absolute;bottom:60px;left:50%;transform:translate(-50%,10px)}
+#entrar{pointer-events:none;position:absolute;top:var(--btnTop,70%);left:50%;transform:translate(-50%,10px);z-index:9999;white-space:nowrap}
 #entrar.show{transform:translate(-50%,0);pointer-events:auto}
 #puzzle{position:relative}
 
@@ -210,6 +210,7 @@ const NS = 'http://www.w3.org/2000/svg';
 document.getElementById('heartPath').setAttribute('d', HEART);
 
 let k = 1, left = 0, placed = 0, zTop = 1;
+stage.appendChild(document.getElementById('entrar'));
 
 function makeSvg(id){
   const s = document.createElementNS(NS,'svg');
@@ -254,6 +255,7 @@ function layout(){
   k = size / 200;
   left = (w - size) / 2;
   stage.style.height = (450 * k + 20) + 'px';
+  stage.style.setProperty('--btnTop', (10 + 215 * k) + 'px');   // justo debajo del corazón
   stage.querySelectorAll('svg').forEach(s => {
     s.style.width = size + 'px';
     s.style.height = (180 * k) + 'px';
