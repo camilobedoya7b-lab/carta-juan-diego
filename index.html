@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Para Juan Diego</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. Colores y base ===== */
+:root{
+  --bg1:#24101b; --bg2:#4a1730;
+  --rose:#e8475f; --rose2:#ff8197;
+  --gold:#f3c77b; --cream:#fff6ec; --ink:#3b1424;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg1)}
+body{
+  font-family:'Cormorant Garamond',serif;
+  background:radial-gradient(circle at 50% 25%,var(--bg2),var(--bg1) 75%) fixed;
+  color:var(--cream); min-height:100vh; overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.hidden{display:none!important}
+body.armando{overflow:hidden;position:fixed;inset:0}
+@media (max-height:640px){.intro h1{font-size:1.9rem}.intro p{font-size:1.05rem}.screen{padding-top:18px}}
+.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 40px}
+
+/* Brillitos de fondo */
+.sparkle{position:fixed;width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:0;pointer-events:none;animation:twinkle 4s infinite}
+@keyframes twinkle{50%{opacity:.8}}
+
+/* ===== 2. Pantalla del rompecabezas ===== */
+.intro{text-align:center;max-width:340px}
+.intro h1{font-family:'Great Vibes',cursive;font-weight:400;font-size:2.4rem;line-height:1.15;color:var(--gold);transition:opacity .6s}
+.intro p{font-size:1.2rem;font-style:italic;opacity:.85;margin-top:10px;transition:opacity .6s}
+.counter{font-size:.85rem;letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin:14px 0 6px}
+
+#puzzle{overscroll-behavior:none}
+#stage{position:relative;cursor:grab;-webkit-touch-callout:none;width:100%;max-width:360px;touch-action:none;user-select:none;-webkit-user-select:none}
+#stage svg{position:absolute;top:10px;overflow:visible}
+#target path{fill:rgba(255,255,255,.04);stroke:rgba(243,199,123,.5);stroke-width:1.2;stroke-dasharray:4 4}
+.piece{pointer-events:none}
+.piece polygon{pointer-events:none;fill:url(#grad);stroke:rgba(255,255,255,.35);stroke-width:1;stroke-linejoin:round}
+.piece.dragging{filter:drop-shadow(0 12px 14px rgba(0,0,0,.5))}
+.piece.snap{animation:snap .45s ease}
+@keyframes snap{50%{filter:drop-shadow(0 0 14px var(--gold))}}
+#stage.done .piece{opacity:0;transition:opacity 1.2s}
+
+#whole{opacity:0;pointer-events:none;transform-origin:50% 50%;transition:opacity 1.2s}
+#whole path{fill:url(#grad)}
+#whole.on{opacity:1;animation:beat 1.5s ease-in-out infinite;filter:drop-shadow(0 0 14px var(--rose2)) drop-shadow(0 0 40px var(--rose))}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.07)}30%{transform:scale(1)}45%{transform:scale(1.04)}}
+
+.btn{
+  font-family:inherit;font-size:1.15rem;letter-spacing:.08em;
+  background:linear-gradient(135deg,var(--rose),#b8304a);color:#fff;border:0;
+  padding:13px 34px;border-radius:40px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(232,71,95,.45);
+  opacity:0;transform:translateY(10px);transition:all .8s;
+}
+.btn.show{opacity:1;transform:none}
+#entrar{pointer-events:none;position:absolute;bottom:60px;left:50%;transform:translate(-50%,10px)}
+#entrar.show{transform:translate(-50%,0);pointer-events:auto}
+#puzzle{position:relative}
+
+/* ===== 3. Pantalla de la carta ===== */
+#carta{opacity:0;transition:opacity 1.2s}
+#carta.on{opacity:1}
+.carta-wrap{width:100%;max-width:420px}
+.titulo{font-family:'Great Vibes',cursive;font-weight:400;font-size:2.9rem;color:var(--gold);text-align:center;line-height:1.1}
+.sub{text-align:center;font-style:italic;opacity:.75;font-size:1.15rem;margin:6px 0 30px}
+
+.fotos{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px}
+.polaroid{background:#fff;padding:8px 8px 26px;border-radius:3px;box-shadow:0 10px 24px rgba(0,0,0,.4)}
+.polaroid{transform:rotate(var(--giro,0deg))}
+.polaroid img,.polaroid .ph{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:2px}
+.polaroid.alta,.polaroid.ancha{grid-column:1/-1}
+.polaroid.alta img{aspect-ratio:4/5}
+.polaroid.ancha img{aspect-ratio:4/3}
+.polaroid .ph{background:#f3e6dc;color:#b48a7a;display:flex;align-items:center;justify-content:center;font-style:italic}
+
+.mensaje{
+  background:var(--cream);color:var(--ink);border-radius:14px;
+  padding:30px 24px;font-size:1.2rem;line-height:1.6;
+  box-shadow:0 14px 40px rgba(0,0,0,.35);margin-bottom:34px;
+}
+.mensaje p+p{margin-top:14px}
+.firma{font-family:'Great Vibes',cursive;font-size:2rem;color:var(--rose);text-align:right;margin-top:16px}
+
+.invitacion{
+  border:1.5px solid var(--gold);border-radius:16px;padding:28px 22px;text-align:center;
+  background:rgba(243,199,123,.06);position:relative;
+}
+.invitacion h2{font-family:'Great Vibes',cursive;font-weight:400;font-size:2.3rem;color:var(--gold)}
+.invitacion .pre{font-size:.85rem;letter-spacing:.25em;text-transform:uppercase;opacity:.7}
+.dato{margin-top:14px}
+.dato span{display:block;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+.dato strong{font-size:1.3rem;font-weight:600}
+.nota{font-style:italic;opacity:.8;margin-top:16px}
+#aceptar{margin-top:22px}
+#respuesta{font-family:'Great Vibes',cursive;font-size:2rem;color:var(--rose2);margin-top:16px;opacity:0;transition:opacity 1s}
+#respuesta.on{opacity:1}
+
+.reveal{opacity:0;transform:translateY(24px);transition:all .9s ease}
+.reveal.in{opacity:1;transform:none}
+.reveal.polaroid{transform:translateY(24px) rotate(var(--giro,0deg))}
+.reveal.polaroid.in{transform:rotate(var(--giro,0deg))}
+
+.float-heart{position:fixed;bottom:-30px;font-size:22px;pointer-events:none;animation:subir 3.5s ease-in forwards}
+@keyframes subir{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+</style>
+</head>
+<body class="armando">
+
+<!-- Gradiente y silueta compartidos por todas las piezas -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="200" y2="180">
+      <stop offset="0" stop-color="#ff8197"/>
+      <stop offset=".55" stop-color="#e8475f"/>
+      <stop offset="1" stop-color="#a8243f"/>
+    </linearGradient>
+    <clipPath id="heartClip"><path id="heartPath"/></clipPath>
+  </defs>
+</svg>
+
+<!-- ===== PANTALLA 1: ROMPECABEZAS ===== -->
+<section id="puzzle" class="screen">
+  <div class="intro">
+    <h1 id="t1">Hay algo que solo tú puedes completar…</h1>
+    <p id="t2">Arrastra las piezas hasta formar nuestro corazón</p>
+  </div>
+  <div class="counter" id="counter">0 / 5</div>
+  <div id="stage"></div>
+  <button class="btn" id="entrar">Entrar ♥</button>
+</section>
+
+<!-- ===== PANTALLA 2: CARTA ===== -->
+<section id="carta" class="screen hidden">
+  <div class="carta-wrap">
+    <h1 class="titulo reveal" id="titulo"></h1>
+    <p class="sub reveal" id="sub"></p>
+    <div class="fotos" id="fotos"></div>
+    <div class="mensaje reveal" id="mensaje"></div>
+    <div class="invitacion reveal">
+      <div class="pre">Tienes una cita</div>
+      <h2>¿Cenamos juntos?</h2>
+      <div class="dato"><span>Fecha</span><strong id="fecha"></strong></div>
+      <div class="dato"><span>Hora</span><strong id="hora"></strong></div>
+      <div class="dato"><span>Lugar</span><strong id="lugar"></strong></div>
+      <p class="nota" id="nota"></p>
+      <button class="btn show" id="aceptar">Acepto ♥</button>
+      <div id="respuesta"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — cambia aquí los textos, fotos y datos de la cena
+   ============================================================ */
+const CONFIG = {
+  titulo:  'Feliz aniversario',
+  sub:     'Juan Diego, esto es para ti',
+  // forma: 'alta' (ancho completo, vertical), 'ancha' (ancho completo, horizontal) o '' (cuadrada)
+  // pos: qué parte de la foto se ve cuando se recorta (ej. 'center 30%')
+  fotos: [
+    { src:'fotos/1.jpg', forma:'alta',  pos:'center 35%', giro:-1.5 },  // grado
+    { src:'fotos/2.jpg', forma:'',      pos:'center 35%', giro:-3   },  // playa
+    { src:'fotos/3.jpg', forma:'',      pos:'58% center', giro: 3   },  // año nuevo
+    { src:'fotos/4.jpg', forma:'ancha', pos:'center 40%', giro: 1.5 }   // casa azul
+  ],
+  mensaje: [
+    '[Aquí va el mensaje de Laura para Juan Diego. Primer párrafo.]',
+    '[Segundo párrafo: un recuerdo, algo que admira de él, lo que viene.]',
+    '[Cierre: por muchos aniversarios más.]'
+  ],
+  firma:   'Laura',
+  cena: {
+    fecha: 'Viernes 6 de noviembre',
+    hora:  '[Hora]',
+    lugar: '[Restaurante]',
+    nota:  '[Un detalle: ponte elegante, yo paso por ti…]'
+  },
+  respuesta: 'Te espero, mi amor'
+};
+
+/* ============================================================
+   EL CORAZÓN Y SUS 5 PIEZAS
+   El corazón vive en un espacio de 200 × 180 unidades.
+   Cada pieza es un polígono recortado con la silueta del corazón.
+   ============================================================ */
+const HEART = 'M100 172 C40 124 0 94 0 52 C0 22 24 2 52 2 C76 2 92 16 100 32 C108 16 124 2 148 2 C176 2 200 22 200 52 C200 94 160 124 100 172 Z';
+
+const PIECES = [
+  { pts:'0,0 100,0 100,32 92,55 106,80 80,72 55,85 30,65 0,75',                         c:[50,40]  }, // arriba izq.
+  { pts:'100,0 200,0 200,80 175,72 150,90 130,70 106,80 92,55 100,32',                  c:[150,40] }, // arriba der.
+  { pts:'0,75 30,65 55,85 80,72 106,80 94,105 104,130 70,138 40,124 0,128',             c:[50,100] }, // centro izq.
+  { pts:'106,80 130,70 150,90 175,72 200,80 200,128 165,124 135,140 104,130 94,105',    c:[150,100]}, // centro der.
+  { pts:'0,128 40,124 70,138 104,130 135,140 165,124 200,128 200,180 0,180',            c:[100,152]}  // punta
+];
+
+// Lugares donde aparecen las piezas regadas (debajo del corazón)
+const SPOTS = [[25,238],[175,238],[100,318],[25,398],[175,398]];
+
+const stage   = document.getElementById('stage');
+const counter = document.getElementById('counter');
+const NS = 'http://www.w3.org/2000/svg';
+document.getElementById('heartPath').setAttribute('d', HEART);
+
+let k = 1, left = 0, placed = 0, zTop = 1;
+
+function makeSvg(id){
+  const s = document.createElementNS(NS,'svg');
+  s.setAttribute('viewBox','0 0 200 180');
+  if (id) s.id = id;
+  stage.appendChild(s);
+  return s;
+}
+
+// Silueta punteada (la guía) y el corazón completo que se ilumina al final
+const target = makeSvg('target');
+target.innerHTML = `<path d="${HEART}"/>`;
+const whole = makeSvg('whole');
+whole.innerHTML = `<path d="${HEART}"/>`;
+
+// Crear las piezas en posiciones revueltas
+const spots = SPOTS.slice().sort(() => Math.random() - .5);
+const pieces = PIECES.map((p, i) => {
+  const el = makeSvg();
+  el.classList.add('piece');
+  el.innerHTML = `<g clip-path="url(#heartClip)"><polygon points="${p.pts}"/></g>`;
+  const s = spots[i];
+  const piece = {
+    el, placed:false, c:p.c,
+    x: s[0] - p.c[0] + (Math.random()*10 - 5),   // desplazamiento desde su lugar correcto
+    y: s[1] - p.c[1] + (Math.random()*10 - 5),
+    r: Math.random()*30 - 15                      // pequeña rotación
+  };
+  return piece;
+});
+
+function render(p){
+  p.el.style.transform = `translate(${p.x*k}px, ${p.y*k}px) rotate(${p.r}deg)`;
+}
+
+function layout(){
+  const w = stage.clientWidth;
+  // Que todo el rompecabezas quepa en la pantalla del celular sin hacer scroll
+  const top = stage.getBoundingClientRect().top + window.scrollY;
+  const altoLibre = window.innerHeight - top - 30;
+  const size = Math.max(150, Math.min(w * 0.7, 260, altoLibre / 450 * 200));
+  k = size / 200;
+  left = (w - size) / 2;
+  stage.style.height = (450 * k + 20) + 'px';
+  stage.querySelectorAll('svg').forEach(s => {
+    s.style.width = size + 'px';
+    s.style.height = (180 * k) + 'px';
+    s.style.left = left + 'px';
+  });
+  pieces.forEach(p => { p.el.style.transformOrigin = `${p.c[0]*k}px ${p.c[1]*k}px`; render(p); });
+}
+window.addEventListener('resize', layout);
+layout();
+
+/* ---------- Arrastrar (funciona con dedo y con mouse) ---------- */
+let drag = null;
+
+// Silueta del corazón para saber si un punto cae dentro
+const heartShape = new Path2D(HEART);
+const ctx = document.createElement('canvas').getContext('2d');
+const POLYS = PIECES.map(p => p.pts.split(' ').map(q => q.split(',').map(Number)));
+
+function inPoly(x, y, poly){
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++){
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Convierte el punto del dedo a coordenadas de la pieza (deshaciendo su giro)
+function toPiece(p, cx, cy){
+  const r = stage.getBoundingClientRect();
+  let x = (cx - r.left - left) / k - p.x;
+  let y = (cy - r.top - 10) / k - p.y;
+  const a = -p.r * Math.PI / 180, dx = x - p.c[0], dy = y - p.c[1];
+  return [p.c[0] + dx*Math.cos(a) - dy*Math.sin(a), p.c[1] + dx*Math.sin(a) + dy*Math.cos(a)];
+}
+
+// ¿Qué pieza tocó? Primero la que está encima; si el dedo cae cerca, la más cercana
+function pieceAt(cx, cy){
+  const free = pieces.map((p, i) => ({p, i})).filter(o => !o.p.placed)
+    .sort((a, b) => (+b.p.el.style.zIndex || 0) - (+a.p.el.style.zIndex || 0));
+  for (const {p, i} of free){
+    const [x, y] = toPiece(p, cx, cy);
+    if (inPoly(x, y, POLYS[i]) && ctx.isPointInPath(heartShape, x, y)) return p;
+  }
+  let best = null, bd = 28;   // margen para dedos gordos (en unidades del corazón)
+  for (const {p} of free){
+    const [x, y] = toPiece(p, cx, cy);
+    const d = Math.hypot(x - p.c[0], y - p.c[1]) - 30;
+    if (d < bd){ bd = d; best = p; }
+  }
+  return best;
+}
+
+function startDrag(cx, cy){
+  const p = pieceAt(cx, cy);
+  if (!p) return false;
+  drag = { p, sx:cx, sy:cy, ox:p.x, oy:p.y };
+  p.r = 0;
+  p.el.style.zIndex = ++zTop;
+  p.el.classList.add('dragging');
+  render(p);
+  return true;
+}
+
+function moveDrag(cx, cy){
+  const p = drag.p;
+  p.x = drag.ox + (cx - drag.sx) / k;
+  p.y = drag.oy + (cy - drag.sy) / k;
+  render(p);
+}
+
+// Dedo (celular)
+stage.addEventListener('touchstart', e => {
+  if (drag) return;
+  const t = e.changedTouches[0];
+  if (startDrag(t.clientX, t.clientY)){ drag.id = t.identifier; e.preventDefault(); }
+}, { passive:false });
+document.addEventListener('touchmove', e => {
+  if (!drag) return;
+  e.preventDefault();
+  const t = [...e.changedTouches].find(t => t.identifier === drag.id);
+  if (t) moveDrag(t.clientX, t.clientY);
+}, { passive:false });
+['touchend', 'touchcancel'].forEach(ev => document.addEventListener(ev, e => {
+  if (drag && [...e.changedTouches].some(t => t.identifier === drag.id)) endDrag();
+}));
+
+// Mouse (computador)
+stage.addEventListener('mousedown', e => { if (startDrag(e.clientX, e.clientY)) e.preventDefault(); });
+document.addEventListener('mousemove', e => { if (drag) moveDrag(e.clientX, e.clientY); });
+document.addEventListener('mouseup', () => endDrag());
+
+function endDrag(){
+  if (!drag) return;
+  const p = drag.p;
+  p.el.classList.remove('dragging');
+  // ¿Quedó cerca de su lugar? Entonces encaja
+  if (Math.hypot(p.x, p.y) < 18) {
+    p.x = 0; p.y = 0; p.placed = true;
+    p.el.classList.add('placed', 'snap');
+    p.el.style.zIndex = 0;
+    placed++;
+    counter.textContent = placed + ' / 5';
+    if (navigator.vibrate) navigator.vibrate(30);
+    if (placed === PIECES.length) setTimeout(complete, 400);
+  }
+  render(p);
+  drag = null;
+}
+
+/* ---------- Corazón completo ---------- */
+function complete(){
+  stage.classList.add('done');
+  whole.classList.add('on');
+  counter.style.opacity = 0;
+  const t1 = document.getElementById('t1'), t2 = document.getElementById('t2');
+  t1.style.opacity = t2.style.opacity = 0;
+  setTimeout(() => {
+    t1.textContent = 'Lo completaste';
+    t2.textContent = 'Así de completo es todo cuando estamos juntos';
+    t1.style.opacity = t2.style.opacity = 1;
+    document.getElementById('entrar').classList.add('show');
+  }, 700);
+}
+
+/* ============================================================
+   LA CARTA
+   ============================================================ */
+document.getElementById('entrar').addEventListener('click', () => {
+  document.getElementById('puzzle').classList.add('hidden');
+  document.body.classList.remove('armando');
+  const carta = document.getElementById('carta');
+  carta.classList.remove('hidden');
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => carta.classList.add('on'));
+});
+
+document.getElementById('titulo').textContent = CONFIG.titulo;
+document.getElementById('sub').textContent = CONFIG.sub;
+document.getElementById('mensaje').innerHTML =
+  CONFIG.mensaje.map(t => `<p>${t}</p>`).join('') +
+  `<div class="firma">${CONFIG.firma}</div>`;
+document.getElementById('fecha').textContent = CONFIG.cena.fecha;
+document.getElementById('hora').textContent  = CONFIG.cena.hora;
+document.getElementById('lugar').textContent = CONFIG.cena.lugar;
+document.getElementById('nota').textContent  = CONFIG.cena.nota;
+
+// Fotos tipo polaroid (si la foto aún no existe, muestra un recuadro)
+const fotos = document.getElementById('fotos');
+CONFIG.fotos.forEach((f, i) => {
+  const d = document.createElement('div');
+  d.className = 'polaroid reveal ' + (f.forma || '');
+  d.style.setProperty('--giro', (f.giro || 0) + 'deg');
+  const img = new Image();
+  img.src = f.src; img.alt = ''; img.loading = 'lazy';
+  if (f.pos) img.style.objectPosition = f.pos;
+  img.onerror = () => { d.innerHTML = `<div class="ph">Foto ${i+1}</div>`; };
+  d.appendChild(img);
+  fotos.appendChild(d);
+});
+
+// Aparecer al hacer scroll
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+}), { threshold:.2 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Botón "Acepto"
+document.getElementById('aceptar').addEventListener('click', e => {
+  e.target.style.display = 'none';
+  const r = document.getElementById('respuesta');
+  r.textContent = CONFIG.respuesta;
+  r.classList.add('on');
+  for (let i = 0; i < 28; i++) setTimeout(() => {
+    const h = document.createElement('div');
+    h.className = 'float-heart';
+    h.textContent = ['❤','💕','💖','✨'][i % 4];
+    h.style.left = Math.random()*100 + 'vw';
+    h.style.fontSize = (16 + Math.random()*18) + 'px';
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 3600);
+  }, i * 90);
+});
+
+/* Brillitos de fondo */
+for (let i = 0; i < 26; i++){
+  const s = document.createElement('div');
+  s.className = 'sparkle';
+  s.style.left = Math.random()*100 + 'vw';
+  s.style.top  = Math.random()*100 + 'vh';
+  s.style.animationDelay = (Math.random()*4) + 's';
+  document.body.appendChild(s);
+}
+</script>
+</body>
+</html>
